@@ -1,0 +1,10 @@
+{
+  "files": {
+    "main.js": "/path-tracer/static/js/main.eaaf219f.js",
+    "index.html": "/path-tracer/index.html",
+    "main.eaaf219f.js.map": "/path-tracer/static/js/main.eaaf219f.js.map"
+  },
+  "entrypoints": [
+    "static/js/main.eaaf219f.js"
+  ]
+}
