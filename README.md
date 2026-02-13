@@ -1,70 +1,81 @@
-# Getting Started with Create React App
+# Path Tracer
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A browser-based path drawing tool that exports directly to ROS 2 `nav_msgs/Path` publish commands.
 
-## Available Scripts
+Draw a path on a metric grid, copy the generated `ros2 topic pub` command, and paste it straight into your terminal.
 
-In the project directory, you can run:
+### AI Disclosure
+This project was entirely generated with Claude Sonnet 4.5. It was validated by hand.
 
-### `npm start`
+---
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+## Features
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+- **Metric grid** — 1 meter scale with major gridlines every 5 meters
+- **Standard coordinates** — +Y is up, matching ROS 2 / REP-103 conventions
+- **Live preview** — dashed line shows the next segment before you commit
+- **Snap to grid** — toggle integer-meter snapping
+- **Close path** — automatically appends the first point to close the loop
+- **Import** — paste an existing `nav_msgs/Path` command to reload a path
+- **ROS 2 output** — one-click copy of a ready-to-run `ros2 topic pub` command
 
-### `npm test`
+---
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+## Usage
 
-### `npm run build`
+### Drawing
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+| Action | Input |
+|---|---|
+| Place point | Left click |
+| Pan | Alt + drag or middle-click drag |
+| Zoom | Scroll wheel |
+| Undo last point | `UNDO` button |
+| Clear all | `CLEAR` button |
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+### Exporting
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+Once your path is drawn, click **COPY** in the sidebar to copy a command like:
 
-### `npm run eject`
+```bash
+ros2 topic pub --once /path nav_msgs/msg/Path "{header: {stamp: {sec: 0, nanosec: 0}, frame_id: 'map'}, poses: [{header: {...}, pose: {position: {x: 1.000, y: 2.000, z: 0.0}, orientation: {x: 0.0, y: 0.0, z: 0.0, w: 1.0}}}, ...]}"
+```
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+Paste it into any terminal with ROS 2 sourced to publish the path to `/path`.
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+### Importing
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+Click **IMPORT**, paste a previously exported command, and click **LOAD PATH** to restore the path onto the canvas.
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+---
 
-## Learn More
+## Getting Started
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+```bash
+npm install
+npm run dev
+```
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+Requires Node.js 18+ and a ROS 2 Humble environment for the output commands.
 
-### Code Splitting
+---
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+## Coordinate System
 
-### Analyzing the Bundle Size
+The canvas uses a standard right-handed 2D coordinate system:
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+- **+X** → right
+- **+Y** → up
+- **Origin (0, 0)** at the crosshair (bottom-left of the default view)
 
-### Making a Progressive Web App
+All coordinates are in **meters**. The `frame_id` defaults to `map`.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+---
 
-### Advanced Configuration
+## Output Format
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+Each pose is published with:
+- `position.z = 0.0`
+- `orientation = (0, 0, 0, 1)` (identity — no rotation)
 
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+To change the topic name or frame, edit `buildRos2Command` in `src/App.jsx`.
